@@ -1,135 +1,339 @@
+// #include <Arduino.h>
+// #include <Wire.h>
+// #include <MPU6050_tockn.h>
+
+// //LIBRARYS
+// #include "gyro.h"
+// #include "motor.h"
+// using namespace gyro;
+// using namespace motor;
+
+// //========================
+
+// //PID control variables
+// struct PID {
+//   float Kp; // Proportional gain
+//   float Ki; // Integral gain
+//   float Kd; // Derivative gain
+//   float previousError; // Previous error value
+//   float integral; // Integral of the error
+// };
+// PID myPID = {1.0, 0.0, 0.0, 0.0, 0.0}; // Initialize PID parameters
+// //========================
+
+
+// // void setup() {
+// //   GyroInit(); // استدعاء دالة تهيئة الجيروسكوب                           
+// //   MotorInit(); // استدعاء دالة تهيئة الموتور
+// // }
+
+// // void loop() {
+// //  //GyroStatePrint(); // استدعاء دالة طباعة حالة الجيروسكوب
+// //   // delay(500); // تأخير نصف ثانية قبل التحديث التالي
+// //   MotorForward(150); // تشغيل الموتور للأمام بسرعة 150
+// //   delay(2000); // تشغيل الموتور للأمام لمدة ثانيتين
+// //   MotorBackward(150); // تشغيل الموتور للخلف بسرعة 150
+// //   delay(2000); // تشغيل الموتور للخلف لمدة ثانيتين
+// //   calculatePID(-70.0, GyroXStateRecord(), 0.01); // حساب قيمة PID بناءً على زاوية الجيروسكوب
+// // }
+// //==========================
+// //TEST
+// float setpoint = -70.0;
+
+// unsigned long previousMicros = 0;
+// const unsigned long sampleTime = 10000; // 10 ms
+
+// void setup() {
+//     Serial.begin(9600);
+
+//     GyroInit();
+//     MotorInit();
+
+//   float calculatePID(float setpoint,
+//                    float measuredValue,
+//                    float dt);
+
+//     previousMicros = micros();
+// }
+
+// void loop() {
+//     unsigned long now = micros();
+
+//     if (now - previousMicros < sampleTime) {
+//         return;
+//     }
+
+//     float dt = (now - previousMicros) / 1000000.0;
+//     previousMicros = now;
+
+//     float angle = GyroXStateRecord();
+
+//     // حد أمان تجريبي: أوقف الدفع إذا مال الروبوت كثيرًا
+//     if (abs(angle) > 30.0) {
+//         MotorStop();
+//         myPID.integral = 0;
+//         myPID.previousError = 0;
+//         return;
+//     }
+
+//     float output = calculatePID(setpoint, angle, dt);
+
+//     // حصر الخرج لأغراض الاختبار الأولي
+//     output = constrain(output, -100, 100);
+
+//     int motorSpeed = (int)abs(output);
+
+//     if (output > 0) {
+//         MotorForward(motorSpeed);
+//     } 
+//     else if (output < 0) {
+//         MotorBackward(motorSpeed);
+//     } 
+//     else {
+//         MotorStop();
+//     }
+
+//     Serial.print("Angle: ");
+//     Serial.print(angle);
+//     Serial.print(" | PID: ");
+//     Serial.println(output);
+// }
+
+// //==========================
+// //  PID control loop for self-balancing robot (not implemented yet)
+
+// // int calculatePID(float setpoint, float measuredValue) {
+// //   float error = setpoint - measuredValue;
+// //   myPID.integral += error;
+// //   float derivative = error - myPID.previousError;
+// //   myPID.previousError = error;
+// //   return myPID.Kp * error + myPID.Ki * myPID.integral + myPID.Kd * derivative;
+// // }
+
+// float calculatePID(float setpoint,
+//                    float measuredValue,
+//                    float dt) {
+
+//     float error = setpoint - measuredValue;
+
+//     myPID.integral += error * dt;
+
+//     float derivative =
+//         (error - myPID.previousError) / dt;
+
+//     myPID.previousError = error;
+
+//     float output =
+//         myPID.Kp * error
+//         + myPID.Ki * myPID.integral
+//         + myPID.Kd * derivative;
+
+//     return output;
+// }
+
+
+//gpt hbd
+
+// #include <Arduino.h>
+// #include <Wire.h>
+// #include <MPU6050_tockn.h>
+
+// #include "gyro.h"
+// #include "motor.h"
+
+// using namespace gyro;
+// using namespace motor;
+
+// struct PID {
+//     float Kp;
+//     float Ki;
+//     float Kd;
+//     float previousError;
+//     float integral;
+// };
+
+// PID myPID = {10.0, 0.001, 6.0, 0.0, 0.0};
+
+// float calculatePID(float setpoint,
+//                    float measuredValue,
+//                    float dt);
+
+// float setpoint = -70.0;
+
+// unsigned long previousMicros = 0;
+// const unsigned long sampleTime = 10000;
+
+// void setup() {
+//     Serial.begin(9600);
+
+//     GyroInit();
+//     MotorInit();
+
+//     previousMicros = micros();
+// }
+
+// void loop() {
+//     unsigned long now = micros();
+
+//     if (now - previousMicros < sampleTime) {
+//         return;
+//     }
+
+//     float dt = (now - previousMicros) / 1000000.0;
+//     previousMicros = now;
+
+//     float angle = GyroXStateRecord();
+
+//     if (angle > -30.0 || angle < -130.0) {
+//         MotorStop();
+//         myPID.integral = 0;
+//         myPID.previousError = 0;
+//         return;
+        
+//     }
+
+//     float output = calculatePID(setpoint, angle, dt);
+//     output = constrain(output, -100.0, 100.0);
+
+//     int motorSpeed =(int)fabs(output);
+
+//     if (output < setpoint) {
+//         MotorForward(motorSpeed);
+//     } else if (output > setpoint) {
+//         MotorBackward(motorSpeed);
+//     } else {
+//         MotorStop();
+//     }
+
+//     Serial.print("Angle: ");
+//     Serial.print(angle);
+//     Serial.print(" | PID: ");
+//     Serial.println(output);
+// }
+
+// float calculatePID(float setpoint,
+//                    float measuredValue,
+//                    float dt) {
+
+//     if (dt <= 0.0) {
+//         return 0.0;
+//     }
+
+//     float error = setpoint - measuredValue;
+
+//     myPID.integral += error * dt;
+
+//     float derivative =
+//         (error - myPID.previousError) / dt;
+
+//     myPID.previousError = error;
+
+//     return myPID.Kp * error
+//          + myPID.Ki * myPID.integral
+//          + myPID.Kd * derivative;
+// }
+
+
 #include <Arduino.h>
+#include <Wire.h>
+#include <MPU6050_tockn.h>
 
 #include "gyro.h"
 #include "motor.h"
 #include "Pid.h"
-
 using namespace gyro;
 using namespace motor;
 using namespace pid;
 
-/* ============================== TUNING =================================== */
-
-// Angle (degrees) at which the robot is perfectly balanced.
-// Hold the robot upright and read `angle=` on the Serial Monitor to find it.
-const float SETPOINT = -70.0f;
-
-// PID gains (output is in PWM units, -255..255).
-//   Kp : how strongly it reacts to tilt.    Too low -> falls over.
-//                                           Too high -> fast oscillation.
-//   Ki : leave at 0.0 for a pure balance loop. A tiny value can remove a
-//        permanent lean, but it also makes the robot slowly drive away.
-//   Kd : damping, acts on the gyro rate.    Too low -> wobbles/overshoots.
-//                                           Too high -> buzzes and shakes.
-const float KP = 18.0f;
-const float KI = 0.0f;
-const float KD = 0.8f;
-
-// Safety: if the robot leans further than this from SETPOINT, cut the motors.
-const float FALL_LIMIT_DEG = 35.0f;
-
-// After a fall the robot must be held within this angle, for this long,
-// before the motors are allowed to run again.
-const float REARM_LIMIT_DEG = 12.0f;
-const unsigned long REARM_HOLD_MS = 400;
-
-// Control loop period: 10 ms -> 100 Hz. Matches the MPU6050_tockn filter,
-// which measures its own dt with millis().
-const unsigned long SAMPLE_PERIOD_US = 10000;
-
-// Telemetry period.
-const unsigned long LOG_PERIOD_MS = 100;
-
-/* ========================================================================= */
+float setpoint = -70.0;
 
 unsigned long previousMicros = 0;
-unsigned long rearmStartMs = 0;
+const unsigned long sampleTime = 10000;
+
+// حدود الأمان
+const float fallLimitDeg = 35.0;       // إذا مال أكثر من هذا نوقف الموتورات
+const float rearmLimitDeg = 12.0;      // يجب أن يعود داخل هذه الزاوية...
+const unsigned long rearmHoldMs = 400; // ...ويبقى فيها هذه المدة قبل التشغيل
+
 bool armed = false;
+unsigned long rearmStartMs = 0;
 
 void setup() {
-  Serial.begin(115200);
-  delay(200);
-  Serial.println(F("Self-balancing robot starting..."));
+    Serial.begin(115200);
 
-  GyroInit();
-  MotorInit();
+    GyroInit();
+    MotorInit();
 
-  balancePID.Kp = KP;
-  balancePID.Ki = KI;
-  balancePID.Kd = KD;
-  balancePID.outMin = -255.0f;
-  balancePID.outMax = 255.0f;
-  balancePID.iTermMin = -40.0f;
-  balancePID.iTermMax = 40.0f;
-  PidInit();
-
-  previousMicros = micros();
-  rearmStartMs = millis();
-
-  Serial.println(F("Hold the robot upright to arm it."));
+    previousMicros = micros();
+    rearmStartMs = millis();
 }
 
 void loop() {
-  const unsigned long now = micros();
-  if (now - previousMicros < SAMPLE_PERIOD_US) {
-    return;
-  }
+    unsigned long now = micros();
 
-  float dt = (now - previousMicros) / 1000000.0f;
-  previousMicros = now;
-
-  // If the loop was ever blocked (Serial, I2C glitch), do not let a huge dt
-  // create a huge derivative spike.
-  if (dt > 0.05f) {
-    dt = 0.05f;
-  }
-
-  GyroUpdate();
-  const float angle = GyroXStateRecord();
-  const float rate = GyroXRate();
-
-  // ---------------------------- Safety -----------------------------------
-  const bool fallen =
-      isnan(angle) || isnan(rate) || fabsf(angle - SETPOINT) > FALL_LIMIT_DEG;
-
-  if (fallen) {
-    if (armed) {
-      MotorStop();
-      armed = false;
+    if (now - previousMicros < sampleTime) {
+        return;
     }
-    balancePID.reset();
-    rearmStartMs = millis();
-  } else if (!armed) {
-    // Re-arm only after the robot has been held near the balance point for a
-    // while, so it cannot suddenly take off while lying on the floor.
-    if (fabsf(angle - SETPOINT) <= REARM_LIMIT_DEG) {
-      if (millis() - rearmStartMs >= REARM_HOLD_MS) {
-        balancePID.reset();
-        armed = true;
-      }
+
+    float dt = (now - previousMicros) / 1000000.0;
+    previousMicros = now;
+
+    // حماية من قفزة كبيرة في dt إذا تأخرت الحلقة
+    if (dt > 0.05) {
+        dt = 0.05;
+    }
+
+    float angle = GyroXStateRecord();
+
+    float output = 0.0;
+
+    // فحص السقوط: أوقف الموتورات إذا خرج عن زاوية الأمان
+    if (fabs(angle - setpoint) > fallLimitDeg) {
+        MotorStop();
+        myPID.integral = 0;
+        myPID.previousError = 0;
+        armed = false;
+        rearmStartMs = millis();
     } else {
-      rearmStartMs = millis();
+        // لا تعمل الموتورات حتى يُثبَّت الروبوت قريباً من نقطة التوازن
+        if (!armed) {
+            if (fabs(angle - setpoint) <= rearmLimitDeg) {
+                if (millis() - rearmStartMs >= rearmHoldMs) {
+                    myPID.integral = 0;
+                    myPID.previousError = 0;
+                    armed = true;
+                }
+            } else {
+                rearmStartMs = millis();
+            }
+        }
+
+        if (armed) {
+            output = calculatePID(setpoint, angle, dt);
+
+            // المدى الكامل للموتور 0..255
+            output = constrain(output, -255.0, 255.0);
+
+            // الاتجاه من إشارة الخرج نفسها (وليس بمقارنته بـ setpoint)
+            if (output > 0) {
+                MotorForward((int)output);
+            } else if (output < 0) {
+                MotorBackward((int)(-output));
+            } else {
+                MotorStop();
+            }
+        }
     }
-  }
 
-  // --------------------------- Controller --------------------------------
-  int output = 0;
-  if (armed) {
-    output = (int)balancePID.computeWithRate(SETPOINT, angle, rate, dt);
-    MotorDrive(output);
-  }
+    // طباعة الحالة كل 100 مللي ثانية فقط (الطباعة كل دورة تبطئ التحكم)
+    static unsigned long lastPrint = 0;
+    if (millis() - lastPrint >= 100) {
+        lastPrint = millis();
 
-  // ---------------------------- Telemetry --------------------------------
-  static unsigned long lastLogMs = 0;
-  if (millis() - lastLogMs >= LOG_PERIOD_MS) {
-    lastLogMs = millis();
-
-    Serial.print(armed ? F("RUN ") : F("IDLE"));
-    Serial.print(F("\tangle="));
-    Serial.print(angle, 2);
-    Serial.print(F("\trate="));
-    Serial.print(rate, 1);
-    Serial.print(F("\tout="));
-    Serial.println(output);
-  }
+        Serial.print(armed ? "RUN  " : "IDLE ");
+        Serial.print("Angle: ");
+        Serial.print(angle);
+        Serial.print(" | Output: ");
+        Serial.println(output);
+    }
 }

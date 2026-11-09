@@ -83,6 +83,59 @@ correction direction is inverted. Fix it by either:
 If it spins instead of driving straight, set `INVERT_MOTOR1` or
 `INVERT_MOTOR2` to `true` in `src/motor.cpp`.
 
+## Serial commands
+
+Type these in the Serial Monitor (send with **no line ending**, or with a
+newline — other characters are ignored):
+
+| Key | Action |
+|---|---|
+| `f` | spin both wheels forward at PWM 120 (test mode, PID off) |
+| `b` | spin both wheels backward at PWM 120 |
+| `s` | stop, return to normal balancing |
+| `+` / `-` | move the setpoint by 1 degree |
+| `x` | emergency stop |
+| `?` | print the command list |
+
+The telemetry line shows the state, so you always know why the motors are or
+are not running:
+
+```
+RUN     angle=-69.80  err=0.20   rate=-1.2  out=6
+ARMING  angle=-63.10  err=-6.90  rate=0.4   out=0
+FALLEN  angle=-18.40  err=51.60  rate=3.1   out=0
+```
+
+* `RUN` — balancing, motors under PID control.
+* `ARMING` — inside the safe angle but the 400 ms hold time has not elapsed.
+* `FALLEN` — more than `FALL_LIMIT_DEG` from the setpoint, motors cut.
+  Hold the robot upright (within `REARM_LIMIT_DEG`) to re-arm it.
+* `TEST` — one of the `f` / `b` commands is driving the motors.
+
+## Diagnosing the behaviour
+
+**Rule: a balancing robot must roll its wheels toward the side it is leaning.**
+That is how it gets the wheels back under its centre of mass. If the wheels
+roll toward the lean but it still falls, the correction is too weak — raise
+`KP` — or `SETPOINT` is wrong.
+
+**Step 1 — is the setpoint right?**
+Hold the robot perfectly upright and look at `angle=`. It must be close to
+`SETPOINT` (`err` near 0). If it is not, use `+` / `-` until `err` is ~0, then
+copy that angle into `SETPOINT_DEFAULT` in `src/main.cpp`.
+
+**Step 2 — is the direction right?**
+Lift the robot so the wheels are off the ground, type `f`, and watch the
+wheels. Then tilt the top of the robot toward you: the wheels should spin in
+that same direction. If they spin the other way, set `INVERT_DIRECTION = true`
+in `src/main.cpp`, or swap the two wires of both motors.
+
+**Step 3 — does it respond at all?**
+With the robot upright (`RUN`), tilt it a few degrees. `out` must grow in the
+direction that pushes the wheels under the robot. A large `err` with `out`
+stuck at `±255` means the controller is saturated: the gains are exhausted, so
+the robot is simply too weak or too slow for the correction requested.
+
 ## Troubleshooting
 
 | Problem | Try |
